@@ -23,16 +23,15 @@ I built this app using Python, Streamlit, Pandas, and NumPy. ChatGPT helped me u
 
 ## How to Run
 
-1. **Install required libraries**  
-Make sure Python is installed, then install the required packages:
+##  Install required libraries  
+Make sure Python is installed, then run:
 
 ```bash
 pip install streamlit pandas numpy
 ```
 
-2. **Run the app from your terminal**
+##  Run the app
 
 ```bash
 streamlit run your_app_filename.py
 ```
-
