@@ -28,3 +28,9 @@ Make sure Python is installed, then install the required packages:
 
 ```bash
 pip install streamlit pandas numpy
+
+2. **Run the app from your terminal**
+
+```bash
+streamlit run your_app_filename.py
+
