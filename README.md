@@ -21,6 +21,15 @@ I built this app using Python, Streamlit, Pandas, and NumPy. ChatGPT helped me u
 - Reset to original data
 - Download cleaned file
 
+##  Version 1.1 Updates
+
+-  Improved handling of high-null columns (dropped if null % > 80)
+-  Separated `Drop Null Columns` and `Drop Rows(Null)` more clearly
+-  Individual fill options for each numeric & categorical column
+-  Streamlined user interface and button labels
+-  Updated column warnings and success messages
+-  Bug fixes from v1.0 (button behaviors and logic)
+
 ## How to Run
 
 1. **Install required libraries**  
