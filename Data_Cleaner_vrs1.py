@@ -9,6 +9,8 @@ st.title("Cleaner - Your data cleaning assistant")
 
 # ------------------- Utility Functions -------------------
 
+# ------------------- Load Data -------------------
+
 def load_data(file):
     """Load and cache uploaded file"""
     if "file_name" not in st.session_state or st.session_state.file_name != file.name:
@@ -16,7 +18,7 @@ def load_data(file):
         st.session_state.raw_data = st.session_state.df.copy()
         st.session_state.file_name = file.name
     return st.session_state.df, st.session_state.raw_data
-
+# ------------------- Preview -------------------
 def preview_data(df):
     """Display basic information about the data"""
     st.subheader('Dataset Preview')
@@ -30,7 +32,7 @@ def preview_data(df):
 
     st.subheader('Statistical Summary')
     st.dataframe(df.describe(include='all').T)
-
+# ------------------- Duplicate Handler -------------------
 def remove_duplicates(df):
     """Remove duplicate rows"""
     st.subheader('Duplicate Checker')
@@ -47,17 +49,19 @@ def remove_duplicates(df):
 def drop_columns(df):
     """Allow user to drop specific columns"""
     st.subheader('Drop Columns')
-    columns = st.multiselect("Select columns to drop", df.columns)
+    columns = st.multiselect("**Select columns to drop**", df.columns)
     if columns:
         if st.button('Drop'):
             df = df.drop(columns=columns)
             st.session_state.df = df
             st.success(f"Columns dropped: {', '.join(columns)}")
-
+    else:
+        st.info("Please select at least one column to drop.")
+# ------------------- Null Handling -------------------
 def null_handling(df):
     """Handle nulls in dataset"""
     sub_option = st.sidebar.radio('Null Handling Options', (
-        'Null percentage', 'Drop Rows(Null)', 'Drop Null Columns', 'Fill Numerical Null', 'Fill Categorical Null'))
+        'Null percentage', 'Drop Rows(Null)', 'Drop Columns(Null)', 'Fill Numerical Null', 'Fill Categorical Null'))
 
     df.replace(['-', 'n/a', 'N/A', 'missing'], np.nan, inplace=True)
     null_per = (df.isnull().mean() * 100).reset_index()
@@ -67,70 +71,108 @@ def null_handling(df):
     if sub_option == 'Null percentage':
         st.subheader('Null Percentages')
         if null_per.empty:
-            st.info('No Null Columns')
+            st.info('Hurray No Null Columns')
         else:
             st.dataframe(null_per)
 
     elif sub_option == 'Drop Rows(Null)':
+        st.subheader('Null Rows Drop')
         rows_loss = df.shape[0] - df.dropna().shape[0]
-        percent_loss = round((rows_loss / df.shape[0]) * 100, 1)
-        st.info(f"Dropping rows will lose {rows_loss} rows ({percent_loss}%)")
-        if st.button('Drop Rows'):
-            df = df.dropna()
-            st.session_state.df = df
-            st.success(f"{rows_loss} rows dropped")
-
-    elif sub_option == 'Drop Null Columns':
-        high_null_cols = null_per[null_per['null %'] > 80]
-        if high_null_cols.empty:
-            st.info('No high-null columns to drop')
+        if rows_loss == 0:
+            st.info('No Null Rows')
         else:
-            st.warning(f"Dropping: {high_null_cols['Columns'].tolist()}")
-            df = df.drop(columns=high_null_cols['Columns'])
-            st.session_state.df = df
-            st.success(f"{len(high_null_cols)} columns dropped")
+            st.warning('Drop only if loss percent is less than 2%, otherwise can lead to data lose')
+            percent_loss = round((rows_loss / df.shape[0]) * 100, 1)
+            st.info(f"Dropping rows will lose {rows_loss} rows and lose percent is ({percent_loss}%)")
+            if st.button('Drop Rows'):
+                df = df.dropna()
+                st.session_state.df = df
+                st.success(f"{rows_loss} rows dropped")
+
+    elif sub_option == 'Drop Columns(Null)':
+        st.subheader('Null Columns Drop')
+        st.warning(f'All columns with null percent greater than percent will be dropped, Default is 80')
+        val = st.number_input(f'Enter the percent',min_value=0, max_value=100, value=80)
+        high_null_cols = null_per[null_per['null %'] > val]
+        if not high_null_cols.empty:
+            st.warning(f"Columns dropped will be : {','.join(high_null_cols['Columns'].tolist())}")
+        
+        if st.button('Drop Columns'):
+            if high_null_cols.empty:
+                st.info('No high-null columns to drop')
+            else:
+                df = df.drop(columns=high_null_cols['Columns'])
+                st.session_state.df = df
+                st.success(f"{','.join(high_null_cols['Columns'].tolist())} columns dropped")
 
     elif sub_option == 'Fill Numerical Null':
         numeric_cols = df.select_dtypes(include=['number']).columns.tolist()
         numeric_nulls = null_per[null_per['Columns'].isin(numeric_cols)].set_index('Columns')['null %'].to_dict()
         if not numeric_nulls:
             st.info("No numerical nulls found.")
+            
+        else:
 
-        for col in numeric_nulls:
-            fill_option = st.radio(f"Fill {col}", ['Use constant', 'Use Median'], key=col)
-            if fill_option == 'Use constant':
-                val = st.number_input(f'Enter value for {col}', key=f'in_{col}')
-                if st.button('Fill', key=f'but_{col}_const'):
-                    df[col] = df[col].fillna(val)
-                    st.success(f"{col} filled with {val}")
-                    st.session_state.df = df
-            else:
-                if st.button('Fill', key=f'but_{col}_median'):
-                    med = df[col].median()
-                    df[col] = df[col].fillna(med)
-                    st.success(f"{col} filled with median {med}")
-                    st.session_state.df = df
+            for col in numeric_nulls:
+                
+                method = st.radio(f"Fill {col}", ['Use constant', 'Use Median'], key=f'num_{col}')
+                if method == 'Use Median':
+                    if numeric_nulls[col] < 4:
+                            st.info(f"{col} has low null %, a constant value may be better than median.")
+                    st.session_state[f'{col}_value'] = 'Median'
+                else:
+                    if numeric_nulls[col] > 4:
+                            st.info(f"{col} has higher null %, consider using median.")
+                    val = st.number_input(f'Enter value for {col}', key=f'inp_{col}')
+                    st.session_state[f'{col}_value'] = val
+                    
+            if st.button("Apply All Numerical Fills"):
+                for col in numeric_nulls:
+                    method = st.session_state.get(f'num_{col}')
+                    value = st.session_state.get(f'{col}_value')
+                    
+                    if value == 'Median':
+                        med = df[col].median()
+                        df[col] = df[col].fillna(med)
+                        st.success(f"{col} filled with median {med}")
+                    else:
+                        df[col] = df[col].fillna(value)
+                        st.success(f"{col} filled with constant: {value}")
+                        
+                st.session_state.df = df
+                
 
     elif sub_option == 'Fill Categorical Null':
         cat_cols = df.select_dtypes(include=['object']).columns.tolist()
         cat_nulls = null_per[null_per['Columns'].isin(cat_cols)].set_index('Columns')['null %'].to_dict()
         if not cat_nulls:
             st.info("No categorical nulls found.")
+            
+        else:
 
-        for col in cat_nulls:
-            method = st.radio(f"Fill {col}", ['Most Frequent', 'User Input'], key=f'cat_{col}')
-            if method == 'Most Frequent':
-                if st.button('Fill', key=f'but_{col}_freq'):
-                    freq = df[col].value_counts().idxmax()
-                    df[col] = df[col].fillna(freq)
-                    st.success(f"{col} filled with most frequent: {freq}")
-                    st.session_state.df = df
-            else:
-                val = st.text_input(f'Enter value for {col}', key=f'inp_{col}')
-                if st.button('Fill', key=f'but_{col}_user'):
-                    df[col] = df[col].fillna(val)
-                    st.success(f"{col} filled with: {val}")
-                    st.session_state.df = df
+            for col in cat_nulls:
+     
+                method = st.radio(f"Fill {col}", ['Most Frequent', 'User Input'], key=f'cat_{col}')
+                if method == 'Most Frequent':
+                    st.session_state[f'{col}_value'] = 'freq'
+                else:
+                    val = st.text_input(f'Enter value for {col}', key=f'inp_{col}')
+                    st.session_state[f'{col}_value'] = val
+            
+            if st.button("Apply All Categorical Fills"):
+                for col in cat_nulls:
+                    method = st.session_state.get(f'cat_{col}')
+                    value = st.session_state.get(f'{col}_value')
+
+                    if value == 'freq':
+                        freq = df[col].value_counts().idxmax()
+                        df[col] = df[col].fillna(freq)
+                        st.success(f"{col} filled with {freq}")
+                    else:
+                        df[col] = df[col].fillna(value)
+                        st.success(f"{col} filled with constant: {value}")
+                
+                st.session_state.df = df
 
 def reset_data(raw_data):
     """Reset data to original uploaded version"""
