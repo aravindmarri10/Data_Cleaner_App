@@ -11,24 +11,45 @@ I built this app using Python, Streamlit, Pandas, and NumPy. ChatGPT helped me u
 
 ## Features
 
-- Upload CSV file
-- Preview rows, columns, info, and summary
-- Remove duplicate rows
-- Drop unwanted columns
-- Show null percentage
-- Drop rows or columns with nulls
-- Fill missing values (numerical and categorical)
-- Reset to original data
-- Download cleaned file
+- **Preview**
+  - View top 5 rows
+  - Column-wise info and data types
+  - Full statistical summary (numerical + categorical)
+
+- **Duplicate Removal**
+  - Detect and remove exact duplicate rows
+  - Drop selected columns via multi-select
+
+- **Null Handling**
+  - Show null percentage column-wise
+  - Drop rows with nulls (warning if >2% loss)
+  - Drop columns based on custom null % threshold
+  - Fill numerical columns
+    - Use constant (recommended if null % < 4%)
+    - Use median (recommended if null % > 4%)
+  - Fill categorical columns
+    - Most frequent value
+    - Custom user value
+
+- **Reset**
+  - Restore dataset to original uploaded state
+
+- **Download**
+  - Download cleaned dataset as CSV
+
+---
 
 ##  Version 1.1 Updates
 
--  Improved handling of high-null columns (dropped if null % > 80)
--  Separated `Drop Null Columns` and `Drop Rows(Null)` more clearly
--  Individual fill options for each numeric & categorical column
--  Streamlined user interface and button labels
--  Updated column warnings and success messages
--  Bug fixes from v1.0 (button behaviors and logic)
+- Added intelligent null handling with suggestions based on null percentage
+- Each numeric and categorical null column now gets its own fill strategy
+- Categorical columns can now be filled using most frequent or user-entered value
+- Warnings and recommendations based on null severity (%)
+- Option to drop high-null columns with custom threshold (default 80%)
+- Consistent use of Streamlit feedback messages (info, warning, success)
+- Download cleaned dataset at any time
+- Better layout, section headers, and overall UI experience
+
 
 ## How to Run
 
