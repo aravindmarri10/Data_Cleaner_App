@@ -11,15 +11,33 @@ I built this app using Python, Streamlit, Pandas, and NumPy. ChatGPT helped me u
 
 ## Features
 
-- Upload CSV file
-- Preview rows, columns, info, and summary
-- Remove duplicate rows
-- Drop unwanted columns
-- Show null percentage
-- Drop rows or columns with nulls
-- Fill missing values (numerical and categorical)
-- Reset to original data
-- Download cleaned file
+- **Preview**
+  - View top 5 rows
+  - Column-wise info and data types
+  - Full statistical summary (numerical + categorical)
+
+- **Duplicate Removal**
+  - Detect and remove exact duplicate rows
+  - Drop selected columns via multi-select
+
+- **Null Handling**
+  - Show null percentage column-wise
+  - Drop rows with nulls (warning if >2% loss)
+  - Drop columns based on custom null % threshold
+  - Fill numerical columns
+    - Use constant (recommended if null % < 4%)
+    - Use median (recommended if null % > 4%)
+  - Fill categorical columns
+    - Most frequent value
+    - Custom user value
+
+- **Reset**
+  - Restore dataset to original uploaded state
+
+- **Download**
+  - Download cleaned dataset as CSV
+
+---
 
 ##  Version 1.1 Updates
 
