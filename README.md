@@ -23,12 +23,15 @@ I built this app using Python, Streamlit, Pandas, and NumPy. ChatGPT helped me u
 
 ##  Version 1.1 Updates
 
--  Improved handling of high-null columns (dropped if null % > 80)
--  Separated `Drop Null Columns` and `Drop Rows(Null)` more clearly
--  Individual fill options for each numeric & categorical column
--  Streamlined user interface and button labels
--  Updated column warnings and success messages
--  Bug fixes from v1.0 (button behaviors and logic)
+- Added intelligent null handling with suggestions based on null percentage
+- Each numeric and categorical null column now gets its own fill strategy
+- Categorical columns can now be filled using most frequent or user-entered value
+- Warnings and recommendations based on null severity (%)
+- Option to drop high-null columns with custom threshold (default 80%)
+- Consistent use of Streamlit feedback messages (info, warning, success)
+- Download cleaned dataset at any time
+- Better layout, section headers, and overall UI experience
+
 
 ## How to Run
 
