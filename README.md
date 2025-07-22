@@ -9,6 +9,10 @@ I got curious after seeing some AI-based data cleaning tools, and thought why no
 
 I built this app using Python, Streamlit, Pandas, and NumPy. ChatGPT helped me understand Streamlit components one by one, and I slowly kept adding new features to the app.
 
+
+ **Live App:** [Click here to try it out](https://datacleanerapp-5yhhyr4tjrpffpuycj384b.streamlit.app/)
+
+
 ## Features
 
 - **Preview**
