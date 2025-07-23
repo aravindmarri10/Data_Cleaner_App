@@ -3,109 +3,105 @@ import pandas as pd
 import numpy as np
 import io
 
-# ------------------- Page Setup -------------------
+# ========== Page Config ==========
 st.set_page_config(page_title="Cleaner", layout="wide")
 st.title("Cleaner - Your data cleaning assistant")
 
-# ------------------- Utility Functions -------------------
-
-# ------------------- Load Data -------------------
-
+# ========== Load Uploaded CSV ==========
 def load_data(file):
-    """Load and cache uploaded file"""
     if "file_name" not in st.session_state or st.session_state.file_name != file.name:
-        st.session_state.df = pd.read_csv(file)
-        st.session_state.raw_data = st.session_state.df.copy()
+        df = pd.read_csv(file)
+        st.session_state.df = df
+        st.session_state.raw_data = df.copy()
         st.session_state.file_name = file.name
     return st.session_state.df, st.session_state.raw_data
-# ------------------- Preview -------------------
+
+# ========== Preview Section ==========
 def preview_data(df):
-    """Display basic information about the data"""
-    st.subheader('Dataset Preview')
-    st.info(f'The dataset has {df.shape[0]} rows and {df.shape[1]} columns')
+    st.subheader("Dataset Preview")
+    st.write(f"Rows: {df.shape[0]} | Columns: {df.shape[1]}")
     st.dataframe(df.head())
 
-    st.subheader('Data Info')
-    buffer = io.StringIO()
-    df.info(buf=buffer)
-    st.text(buffer.getvalue())
+    st.subheader("Column Types & Info")
+    buf = io.StringIO()
+    df.info(buf=buf)
+    st.text(buf.getvalue())
 
-    st.subheader('Statistical Summary')
+    st.subheader("Descriptive Statistics")
     st.dataframe(df.describe(include='all').T)
-# ------------------- Duplicate Handler -------------------
+
+# ========== Handle Duplicates ==========
 def remove_duplicates(df):
-    """Remove duplicate rows"""
-    st.subheader('Duplicate Checker')
-    dup_count = df.duplicated().sum()
-    if dup_count > 0:
-        st.warning(f'{dup_count} duplicate rows found')
-        if st.button('Remove Duplicates'):
+    st.subheader("Check Duplicates")
+    dup = df.duplicated().sum()
+    if dup > 0:
+        st.warning(f"{dup} duplicate rows found.")
+        if st.button("Drop Duplicates"):
             df = df.drop_duplicates(ignore_index=True)
-            st.success('Duplicates removed')
+            st.success("Removed duplicate rows.")
             st.session_state.df = df
     else:
-        st.info('No Duplicates found')
+        st.info("No duplicates detected.")
 
 def drop_columns(df):
-    """Allow user to drop specific columns"""
-    st.subheader('Drop Columns')
-    columns = st.multiselect("**Select columns to drop**", df.columns)
-    if columns:
-        if st.button('Drop'):
-            df = df.drop(columns=columns)
+    st.subheader("Drop Columns")
+    cols = st.multiselect("Select columns to drop", df.columns.tolist())
+    if cols:
+        if st.button("Apply Drop"):
+            df = df.drop(columns=cols)
+            st.success(f"Dropped: {', '.join(cols)}")
             st.session_state.df = df
-            st.success(f"Columns dropped: {', '.join(columns)}")
-    else:
-        st.info("Please select at least one column to drop.")
-# ------------------- Null Handling -------------------
+
+# ========== Null Handling ==========
 def null_handling(df):
-    """Handle nulls in dataset"""
-    sub_option = st.sidebar.radio('Null Handling Options', (
-        'Null percentage', 'Drop Rows(Null)', 'Drop Columns(Null)', 'Fill Numerical Null', 'Fill Categorical Null'))
+    st.subheader("Missing Value Handler")
+    sub = st.sidebar.radio("Choose null handling method", 
+                           ['Null Summary', 'Drop Rows with Nulls', 
+                            'Drop Columns with Nulls', 
+                            'Fill Numeric Nulls', 'Fill Categorical Nulls'])
 
     df.replace(['-', 'n/a', 'N/A', 'missing'], np.nan, inplace=True)
     null_per = (df.isnull().mean() * 100).reset_index()
     null_per.columns = ['Columns', 'null %']
     null_per = null_per[null_per['null %'] > 0]
+    
 
-    if sub_option == 'Null percentage':
-        st.subheader('Null Percentages')
+    if sub == 'Null Summary':
         if null_per.empty:
-            st.info('Hurray No Null Columns')
+            st.success("No nulls found.")
         else:
             st.dataframe(null_per)
 
-    elif sub_option == 'Drop Rows(Null)':
-        st.subheader('Null Rows Drop')
-        rows_loss = df.shape[0] - df.dropna().shape[0]
-        if rows_loss == 0:
-            st.info('No Null Rows')
+    elif sub == 'Drop Rows with Nulls':
+        dropped_df = df.dropna()
+        loss = df.shape[0] - dropped_df.shape[0]
+        loss_pct = round((loss / df.shape[0]) * 100, 2)
+        if loss == 0:
+            st.info("No null rows to drop.")
         else:
-            st.warning('Drop only if loss percent is less than 2%, otherwise can lead to data lose')
-            percent_loss = round((rows_loss / df.shape[0]) * 100, 1)
-            st.info(f"Dropping rows will lose {rows_loss} rows and lose percent is ({percent_loss}%)")
-            if st.button('Drop Rows'):
-                df = df.dropna()
-                st.session_state.df = df
-                st.success(f"{rows_loss} rows dropped")
+            st.warning(f"{loss} rows will be removed ({loss_pct}% of data).")
+            if st.checkbox("Preview rows to be dropped"):
+                st.dataframe(df[~df.index.isin(dropped_df.index)])
+            if st.button("Drop Null Rows"):
+                st.session_state.df = dropped_df
+                st.success("Null rows removed.")
+                
 
-    elif sub_option == 'Drop Columns(Null)':
-        st.subheader('Null Columns Drop')
-        st.warning(f'All columns with null percent greater than percent will be dropped, Default is 80')
-        val = st.number_input(f'Enter the percent',min_value=0, max_value=100, value=80)
-        high_null_cols = null_per[null_per['null %'] > val]
-        if not high_null_cols.empty:
-            st.warning(f"Columns dropped will be : {','.join(high_null_cols['Columns'].tolist())}")
+    elif sub == 'Drop Columns with Nulls':
+            
+        threshold = st.slider("Drop columns with nulls above (%)", 0, 100, 80)
+        to_drop = null_per[null_per['null %'] > threshold]['Columns'].tolist()
+        if to_drop:
+            st.warning(f"Will drop columns: {', '.join(to_drop)}")
+            if st.button("Drop Columns"):
+                df = df.drop(columns=to_drop)
+                st.session_state.df = df
+                st.success("Columns dropped.")
+        else:
+            st.info("No columns meet threshold.")
+
+    elif sub == 'Fill Numeric Nulls':
         
-        if st.button('Drop Columns'):
-            if high_null_cols.empty:
-                st.info('No high-null columns to drop')
-            else:
-                df = df.drop(columns=high_null_cols['Columns'])
-                st.session_state.df = df
-                st.success(f"{','.join(high_null_cols['Columns'].tolist())} columns dropped")
-
-    elif sub_option == 'Fill Numerical Null':
         numeric_cols = df.select_dtypes(include=['number']).columns.tolist()
         numeric_nulls = null_per[null_per['Columns'].isin(numeric_cols)].set_index('Columns')['null %'].to_dict()
         if not numeric_nulls:
@@ -140,9 +136,8 @@ def null_handling(df):
                         st.success(f"{col} filled with constant: {value}")
                         
                 st.session_state.df = df
-                
 
-    elif sub_option == 'Fill Categorical Null':
+    elif sub == 'Fill Categorical Nulls':
         cat_cols = df.select_dtypes(include=['object']).columns.tolist()
         cat_nulls = null_per[null_per['Columns'].isin(cat_cols)].set_index('Columns')['null %'].to_dict()
         if not cat_nulls:
@@ -174,45 +169,128 @@ def null_handling(df):
                 
                 st.session_state.df = df
 
-def reset_data(raw_data):
-    """Reset data to original uploaded version"""
-    st.subheader('Reset Data')
-    st.warning('All changes will be revoked')
-    if st.button('Confirm for Data Reset'):
-        st.info(f"The original data has {raw_data.shape[0]} rows and {raw_data.shape[1]} columns")
-        st.session_state.df = raw_data.copy()
-        st.success("Dataset has been reset to original")
+# ========== Outlier Detection ==========
+def outlier_detection(df):
+    st.subheader("Outlier Handler")
+    mode = st.sidebar.radio("Outlier Option", ['Show Outliers', 'Drop Outliers', 'Capping'])
+
+    num_cols = df.select_dtypes(include='number').columns.tolist()
+    summary = []
+
+    for col in num_cols:
+        Q1 = df[col].quantile(0.25)
+        Q3 = df[col].quantile(0.75)
+        IQR = Q3 - Q1
+        low = Q1 - 1.5 * IQR
+        high = Q3 + 1.5 * IQR
+        count = df[(df[col] < low) | (df[col] > high)].shape[0]
+        summary.append({'Column': col, 'Outlier Count': count})
+
+    outlier_df = pd.DataFrame(summary)
+
+    if mode == 'Show Outliers':
+        if outlier_df['Outlier Count'].sum() == 0:
+            st.info("No outliers detected.")
+        else:
+            st.dataframe(outlier_df)
+
+    elif mode == 'Drop Outliers':
+        
+        if outlier_df['Outlier Count'].sum() == 0:
+            st.info("No outliers detected.")
+        else:
+            st.warning("""Note: Dropping outliers shifts IQR. Use wisely.
+                          New outliers may appear even after this cleaning.""")
+
+            cols = st.multiselect("Select columns for outlier removal", outlier_df[outlier_df['Outlier Count'] > 0]['Column'])
+            if cols:
+                temp = df.copy()
+                rows_before = temp.shape[0]
+                for col in cols:
+                    Q1 = temp[col].quantile(0.25)
+                    Q3 = temp[col].quantile(0.75)
+                    IQR = Q3 - Q1
+                    low = Q1 - 1.5 * IQR
+                    high = Q3 + 1.5 * IQR
+                    temp = temp[(temp[col] >= low) & (temp[col] <= high)]
+                rows_after = temp.shape[0]
+                loss = rows_before - rows_after
+                percent_lost = round((loss / rows_before) * 100, 2)
+                st.info(f"Will drop {loss} rows ({percent_lost}% of dataset)")
+                
+                if percent_lost < 5:
+                    st.success("Safe to drop. Minimal loss.")
+                elif percent_lost > 20:
+                    st.warning("High data loss! Consider using capping")
+                else:
+                    st.info("Moderate data loss. Proceed based on data context.")
+                    
+                if st.checkbox("Preview rows to be dropped"):
+                    dropped = df[~df.index.isin(temp.index)]
+                    st.dataframe(dropped)
+                if st.button("Confirm Outlier Removal"):
+                    st.session_state.df = temp
+                    st.success("Outliers removed.")
+                    
+    elif mode == 'Capping':
+        cols = st.multiselect("Select columns for outlier removal", outlier_df[outlier_df['Outlier Count'] > 0]['Column'])
+        temp = df.copy()
+        for col in cols:
+            Q1 = temp[col].quantile(0.25)
+            Q3 = temp[col].quantile(0.75)
+            IQR = Q3 - Q1
+            lower = Q1 - 1.5 * IQR
+            upper = Q3 + 1.5 * IQR
+            
+            temp[col] = np.where(temp[col] < lower, lower, temp[col])
+            temp[col] = np.where(temp[col] > upper, upper, temp[col])
+            
+        if st.checkbox("Show capped rows"):
+            changed_rows = df[cols] != temp[cols]
+            affected = df[changed_rows.any(axis=1)]
+            st.write(f"{affected.shape[0]} rows had outlier values capped.")
+            st.dataframe(affected)
+
+        
+        if st.button("Confirm Outlier Capping"):
+            st.session_state.df = temp
+            st.success("Outliers Capped.")
+        
+
+# ========== Reset & Download ==========
+def reset_data(original):
+    st.subheader("Reset to Original")
+    if st.button("Reset"):
+        st.session_state.df = original.copy()
+        st.success("Reset complete.")
 
 def download_data(df):
-    """Download the cleaned dataset"""
-    csv = df.to_csv(index=False).encode('utf-8')
-    st.download_button(label='Download Cleaned CSV', data=csv, file_name='clean.csv')
+    st.download_button("Download Cleaned CSV", df.to_csv(index=False), file_name="cleaned_data.csv")
 
-# ------------------- Main Flow -------------------
-
-file = st.file_uploader("Upload a CSV file", type=["csv"])
+# ========== Main App ==========
+file = st.file_uploader("Upload your CSV file", type=['csv'])
 
 if file:
-    df, raw_data = load_data(file)
+    df, original = load_data(file)
 
-    option = st.sidebar.radio("Choose an operation", 
-                              ['Preview', 'Duplicate Removal', 'Null Handling', 'Reset Data'])
+    tab = st.sidebar.radio("What do you want to do?", 
+                           ["Preview", "Duplicate Handling", "Null Handling", "Outlier Detection", "Reset Data"])
 
-    if option == 'Preview':
+    if tab == "Preview":
         preview_data(df)
-
-    elif option == 'Duplicate Removal':
-        task = st.sidebar.radio('Choose', ['Rows Duplicate Removal', 'Drop Columns'])
-        if task == 'Rows Duplicate Removal':
+    elif tab == "Duplicate Handling":
+        action = st.sidebar.radio("Pick Task", ["Remove Duplicates", "Drop Columns"])
+        if action == "Remove Duplicates":
             remove_duplicates(df)
         else:
             drop_columns(df)
-
-    elif option == 'Null Handling':
+    elif tab == "Null Handling":
         null_handling(df)
-
-    elif option == 'Reset Data':
-        reset_data(raw_data)
+    elif tab == "Outlier Detection":
+        outlier_detection(df)
+    elif tab == "Reset Data":
+        reset_data(original)
 
     st.markdown("---")
     download_data(st.session_state.df)
+st.sidebar.markdown("**Developed by Aravind**")
