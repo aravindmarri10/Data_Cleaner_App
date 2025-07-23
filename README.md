@@ -54,6 +54,14 @@ I built this app using Python, Streamlit, Pandas, and NumPy. ChatGPT helped me u
 - Download cleaned dataset at any time
 - Better layout, section headers, and overall UI experience
 
+##  Version 1.2 Updates
+-Major Additions:
+ Outlier Detection Module added under sidebar tab:
+ - Show Outliers (IQR method)
+ - Drop Outliers (row-wise removal with loss summary)
+ - Capping Outliers (replace with lower/upper bounds)
+ - Includes safety checks and preview options for data loss.
+
 
 ## How to Run
 
