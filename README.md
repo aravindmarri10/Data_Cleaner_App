@@ -64,6 +64,14 @@ I built this app using Python, Streamlit, Pandas, and NumPy. ChatGPT helped me u
  - Includes safety checks and preview options for data loss
 
 
+##  Version 1.3 Updates
+- Data type conversion
+  - View column types
+  - Convert to int,float,string,datetime
+  - Raise error on invalid conversion to ensure only valid data is transformed
+    
+
+
 .
 ## How to Run
 
