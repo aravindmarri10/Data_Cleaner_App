@@ -169,6 +169,48 @@ def null_handling(df):
                 
                 st.session_state.df = df
 
+# ========== Type Convertor ==========
+def type_convertor(df):
+    st.subheader("Type Convertor")
+    
+    cols = df.columns.tolist()
+    selected_col = st.selectbox("Select column to convert", cols)
+    
+    current_dtype = df[selected_col].dtype
+    st.write(f"Current dtype of {selected_col}: **{current_dtype}**")
+    
+    new_type = st.selectbox("Convert to type", ["int", "float", "str", "datetime"])
+    
+    if st.button("Preview Conversion"):
+        try:
+            if new_type == "int":
+                converted = pd.to_numeric(df[selected_col], errors='coerce').astype("Int64")
+            elif new_type == "float":
+                converted = pd.to_numeric(df[selected_col], errors='coerce').astype(float)
+            elif new_type == "str":
+                converted = df[selected_col].astype(str)
+            elif new_type == "datetime":
+                converted = pd.to_datetime(df[selected_col], errors='coerce')
+
+            nulls_introduced = converted.isna().sum()
+            total = df.shape[0]
+            percent = round((nulls_introduced / total) * 100, 2)
+
+            if percent > 0:
+                st.warning(f"{nulls_introduced} rows ({percent}%) would become NaN after conversion.")
+            else:
+                st.success("Conversion is safe. No nulls introduced.")
+
+            st.dataframe(converted.head())
+
+            if st.button("Apply Conversion"):
+                df[selected_col] = converted
+                st.session_state.df = df
+                st.success(f"Column {selected_col} converted to {new_type}.")
+        except Exception as e:
+            st.error(f"Error in conversion: {e}")
+    
+
 # ========== Outlier Detection ==========
 def outlier_detection(df):
     st.subheader("Outlier Handler")
@@ -233,28 +275,32 @@ def outlier_detection(df):
                     st.success("Outliers removed.")
                     
     elif mode == 'Capping':
-        cols = st.multiselect("Select columns for outlier removal", outlier_df[outlier_df['Outlier Count'] > 0]['Column'])
-        temp = df.copy()
-        for col in cols:
-            Q1 = temp[col].quantile(0.25)
-            Q3 = temp[col].quantile(0.75)
-            IQR = Q3 - Q1
-            lower = Q1 - 1.5 * IQR
-            upper = Q3 + 1.5 * IQR
-            
-            temp[col] = np.where(temp[col] < lower, lower, temp[col])
-            temp[col] = np.where(temp[col] > upper, upper, temp[col])
-            
-        if st.checkbox("Show capped rows"):
-            changed_rows = df[cols] != temp[cols]
-            affected = df[changed_rows.any(axis=1)]
-            st.write(f"{affected.shape[0]} rows had outlier values capped.")
-            st.dataframe(affected)
-
         
-        if st.button("Confirm Outlier Capping"):
-            st.session_state.df = temp
-            st.success("Outliers Capped.")
+        if outlier_df['Outlier Count'].sum() == 0:
+            st.info("No outliers detected.")
+        else:
+            cols = st.multiselect("Select columns for outlier removal", outlier_df[outlier_df['Outlier Count'] > 0]['Column'])
+            temp = df.copy()
+            for col in cols:
+                Q1 = temp[col].quantile(0.25)
+                Q3 = temp[col].quantile(0.75)
+                IQR = Q3 - Q1
+                lower = Q1 - 1.5 * IQR
+                upper = Q3 + 1.5 * IQR
+                
+                temp[col] = np.where(temp[col] < lower, lower, temp[col])
+                temp[col] = np.where(temp[col] > upper, upper, temp[col])
+                
+            if st.checkbox("Show capped rows"):
+                changed_rows = df[cols] != temp[cols]
+                affected = df[changed_rows.any(axis=1)]
+                st.write(f"{affected.shape[0]} rows had outlier values capped.")
+                st.dataframe(affected)
+
+            
+            if st.button("Confirm Outlier Capping"):
+                st.session_state.df = temp
+                st.success("Outliers Capped.")
         
 
 # ========== Reset & Download ==========
@@ -274,7 +320,7 @@ if file:
     df, original = load_data(file)
 
     tab = st.sidebar.radio("What do you want to do?", 
-                           ["Preview", "Duplicate Handling", "Null Handling", "Outlier Detection", "Reset Data"])
+                           ["Preview", "Duplicate Handling", "Null Handling", "Outlier Detection", "Type Convertor", "Reset Data"])
 
     if tab == "Preview":
         preview_data(df)
@@ -288,6 +334,8 @@ if file:
         null_handling(df)
     elif tab == "Outlier Detection":
         outlier_detection(df)
+    elif tab == "Type Convertor":
+        type_convertor(df)
     elif tab == "Reset Data":
         reset_data(original)
 
