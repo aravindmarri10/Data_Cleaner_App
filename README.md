@@ -65,10 +65,10 @@ I built this app using Python, Streamlit, Pandas, and NumPy. ChatGPT helped me u
 
 
 ## Version 1.3 Updates
--Type Converter:
-  -Convert to user prefered data type (int,str,float,datetime).
-  -Preview conversion before applying.
-  -Warns if data loss is expected.
+- Type Converter:
+  - Convert to user prefered data type (int,str,float,datetime).
+  - Preview conversion before applying.
+  - Warns if data loss is expected.
 
 
   -
