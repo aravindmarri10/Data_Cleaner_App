@@ -1,89 +1,89 @@
 # Data_Cleaner_App
-Streamlit-based app for basic data cleaning
-### 🛠 Tech Stack
-![Python](https://img.shields.io/badge/Python-3.10-blue)
-![Pandas](https://img.shields.io/badge/Pandas-Data--Handling-green)
-![Streamlit](https://img.shields.io/badge/Streamlit-App-red)
-![NumPy](https://img.shields.io/badge/NumPy-Numerical-yellow)
 
-# Cleaner - Data Cleaning Assistant
+A Streamlit-based app for basic data cleaning.
 
 This is a beginner-friendly Streamlit app I created while learning data cleaning as part of my AlmaBetter course.
 
 I got curious after seeing some AI-based data cleaning tools, and thought why not try building something of my own. I had no idea where to start, but after learning about Streamlit, I realized I could build a UI easily without HTML or CSS.
 
-I built this app using Python, Streamlit, Pandas, and NumPy. ChatGPT helped me understand Streamlit components one by one, and I slowly kept adding new features to the app.
+I built this app using Python, Streamlit, Pandas, and NumPy, and I slowly kept adding new features to the app.
 
+[Live App - Try it here](https://datacleanerapp-5yhhyr4tjrpffpuycj384b.streamlit.app/)
 
- **[Live App - Try it here](https://datacleanerapp-5yhhyr4tjrpffpuycj384b.streamlit.app/)**
+## App Screenshot
 
 ![App Screenshot](demo/Screenshot.png)
 
+## Tech Stack
 
+- Python
+- Streamlit
+- Pandas
+- NumPy
 
 ## Features
 
-- **Preview**
-  - View top 5 rows
-  - Column-wise info and data types
-  - Full statistical summary (numerical + categorical)
+### Preview
+- View top 5 rows
+- Column-wise info and data types
+- Full statistical summary (numerical and categorical)
 
-- **Duplicate Removal**
-  - Detect and remove exact duplicate rows
-  - Drop selected columns via multi-select
+### Duplicate Removal
+- Detect and remove exact duplicate rows
+- Drop selected columns via multi-select
 
-- **Null Handling**
-  - Show null percentage column-wise
-  - Drop rows with nulls (warning if >2% loss)
-  - Drop columns based on custom null % threshold
-  - Fill numerical columns
-    - Use constant (recommended if null % < 4%)
-    - Use median (recommended if null % > 4%)
-  - Fill categorical columns
-    - Most frequent value
-    - Custom user value
+### Null Handling
+- Show null percentage column-wise
+- Drop rows with nulls (warning if >2% loss)
+- Drop columns based on custom null percentage threshold
+- Fill numerical columns:
+  - Use constant (recommended if null % < 4%)
+  - Use median (recommended if null % > 4%)
+- Fill categorical columns:
+  - Most frequent value
+  - Custom user-defined value
 
-- **Reset**
-  - Restore dataset to original uploaded state
+### Outlier Detection (v1.2)
+- Show outliers using IQR method
+- Drop outliers with row-wise removal and loss summary
+- Cap outliers to upper/lower bounds
 
-- **Download**
-  - Download cleaned dataset as CSV
+### Type Converter (v1.3)
+- Convert to int, float, string, or datetime
+- Preview conversion before applying
+- Warns if conversion introduces nulls
 
----
+### Reset and Download
+- Reset dataset to original uploaded state
+- Download cleaned dataset as CSV
 
-##  Version 1.1 Updates
+## Version History
 
-- Added intelligent null handling with suggestions based on null percentage
-- Each numeric and categorical null column now gets its own fill strategy
-- Categorical columns can now be filled using most frequent or user-entered value
-- Warnings and recommendations based on null severity (%)
-- Option to drop high-null columns with custom threshold (default 80%)
-- Consistent use of Streamlit feedback messages (info, warning, success)
-- Download cleaned dataset at any time
-- Better layout, section headers, and overall UI experience
+### v1.1
+- Added intelligent null handling with fill suggestions
+- Separate fill strategy for each column
+- Warnings based on null severity
+- Improved UI and feedback messages
 
+### v1.2
+- Added outlier detection and cleaning module
+- Options to drop or cap outliers
+- Preview and warnings before changes
 
-##  Version 1.2 Updates
--Major Additions:
- Outlier Detection Module added under sidebar tab:
- - Show Outliers (IQR method)
- - Drop Outliers (row-wise removal with loss summary)
- - Capping Outliers (replace with lower/upper bounds)
- - Includes safety checks and preview options for data loss
+### v1.3
+- Added type conversion feature
+- Preview and validation for data loss during conversion
 
+## What I Learned
 
-## Version 1.3 Updates
-- Type Converter:
-  - Convert to user prefered data type (int,str,float,datetime).
-  - Preview conversion before applying.
-  - Warns if data loss is expected.
+- How to build dynamic UIs in Streamlit using session state
+- Implementing real-time validation and data handling
+- Designing safe operations with previews, warnings, and reset options
+- Importance of user feedback and experience
 
+## How to Run Locally
 
-  
-## How to Run
-
-1. **Install required libraries**  
-Make sure Python is installed, then install the required packages:
+1. Install the required libraries:
 
 ```bash
 pip install streamlit pandas numpy
@@ -94,13 +94,3 @@ pip install streamlit pandas numpy
 ```bash
 streamlit run your_app_filename.py
 ```
-
-
-##  What I Learned
-- How to build dynamic UIs in Streamlit using session state
-- Implementing real-time validation and user-driven data pipelines
-- Designing user-safe operations (preview before apply, reset options)
-- Importance of user feedback (warnings, success messages)
-
-
-
