@@ -63,6 +63,15 @@ I built this app using Python, Streamlit, Pandas, and NumPy. ChatGPT helped me u
  - Capping Outliers (replace with lower/upper bounds)
  - Includes safety checks and preview options for data loss
 
+
+## Version 1.3 Updates
+-Type Converter:
+  -Convert to user prefered data type (int,str,float,datetime).
+  -Preview conversion before applying.
+  -Warns if data loss is expected.
+
+
+  -
     
 
 

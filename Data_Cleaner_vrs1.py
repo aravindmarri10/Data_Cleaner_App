@@ -201,6 +201,26 @@ def type_convertor(df):
             else:
                 st.success("Conversion is safe. No nulls introduced.")
 
+            st.session_state.converted_col = converted
+            st.session_state.converted_col_name = selected_col
+            st.session_state.new_dtype = new_type
+            st.dataframe(converted.head())
+
+        except Exception as e:
+            st.error(f"Error in conversion: {e}")
+            
+    if st.button("Apply Conversion"):
+        if (
+            "converted_col" in st.session_state and 
+            st.session_state.get("converted_col_name") == selected_col
+        ):
+            df[selected_col] = st.session_state.converted_col
+            st.session_state.df = df
+            st.success(f"Column {selected_col} converted to {st.session_state.new_dtype}.")
+        else:
+            st.warning("Please preview conversion before applying.")
+
+
             st.dataframe(converted.head())
 
             if st.button("Apply Conversion"):
@@ -209,6 +229,7 @@ def type_convertor(df):
                 st.success(f"Column {selected_col} converted to {new_type}.")
         except Exception as e:
             st.error(f"Error in conversion: {e}")
+
     
 
 # ========== Outlier Detection ==========
