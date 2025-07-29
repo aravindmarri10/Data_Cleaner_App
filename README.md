@@ -1,5 +1,10 @@
 # Data_Cleaner_App
 Streamlit-based app for basic data cleaning
+### 🛠 Tech Stack
+![Python](https://img.shields.io/badge/Python-3.10-blue)
+![Pandas](https://img.shields.io/badge/Pandas-Data--Handling-green)
+![Streamlit](https://img.shields.io/badge/Streamlit-App-red)
+![NumPy](https://img.shields.io/badge/NumPy-Numerical-yellow)
 
 # Cleaner - Data Cleaning Assistant
 
@@ -11,6 +16,7 @@ I built this app using Python, Streamlit, Pandas, and NumPy. ChatGPT helped me u
 
 
  **[Live App - Try it here](https://datacleanerapp-5yhhyr4tjrpffpuycj384b.streamlit.app/)**
+
 
 
 ## Features
@@ -71,11 +77,7 @@ I built this app using Python, Streamlit, Pandas, and NumPy. ChatGPT helped me u
   - Warns if data loss is expected.
 
 
-  -
-    
-
-
-.
+  
 ## How to Run
 
 1. **Install required libraries**  
@@ -90,4 +92,13 @@ pip install streamlit pandas numpy
 ```bash
 streamlit run your_app_filename.py
 ```
+
+
+##  What I Learned
+- How to build dynamic UIs in Streamlit using session state
+- Implementing real-time validation and user-driven data pipelines
+- Designing user-safe operations (preview before apply, reset options)
+- Importance of user feedback (warnings, success messages)
+
+
 
