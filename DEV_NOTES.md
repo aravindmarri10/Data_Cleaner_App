@@ -53,6 +53,9 @@ I built this app using Python, Streamlit, Pandas, and NumPy, and I slowly kept a
 - Preview conversion before applying
 - Warns if conversion introduces nulls
 
+### EDA
+- Added Histogram, boxplot anf heatmap 
+
 ### Reset and Download
 - Reset dataset to original uploaded state
 - Download cleaned dataset as CSV
@@ -73,6 +76,7 @@ I built this app using Python, Streamlit, Pandas, and NumPy, and I slowly kept a
 ### v1.3
 - Added type conversion feature
 - Preview and validation for data loss during conversion
+- Add eda : Histogram, Boxplot and Heatmap
 
 ## What I Learned
 
