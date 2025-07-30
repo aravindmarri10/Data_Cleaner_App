@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import io
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 # ========== Page Config ==========
 st.set_page_config(page_title="Cleaner", layout="wide")
@@ -29,6 +31,41 @@ def preview_data(df):
 
     st.subheader("Descriptive Statistics")
     st.dataframe(df.describe(include='all').T)
+    
+# ========== EDA ==========
+    
+    
+def eda(df):
+    st.subheader("Exploratory Data Analysis")
+    plot = st.sidebar.radio("Show Plots", ['Histogram', 'Box Plot', 'Heat Map'])
+    if plot == 'Histogram':
+        st.subheader("Histogram")
+    
+
+        if st.checkbox("Histogram Viewer"):
+            num_cols = df.select_dtypes(include='number').columns.tolist()
+            selected = st.multiselect("Select numeric columns", num_cols)
+            for col in selected:
+                fig, ax = plt.subplots()
+                sns.histplot(df[col], kde=True, ax=ax)
+                ax.set_title(f"Distribution of {col}")
+                st.pyplot(fig)
+                
+    elif plot  == 'Box Plot':
+        st.subheader("Box Plot")
+        col = st.selectbox("Select a numeric column", df.select_dtypes(include='number').columns)
+        fig, ax = plt.subplots()
+        sns.boxplot(x=df[col], ax=ax)
+        ax.set_title(f"Boxplot of {col}")
+        st.pyplot(fig)
+        
+    elif plot  == 'Heat Map':
+        st.subheader("Heat Map")
+        num_df = df.select_dtypes(include='number')
+        
+        fig, ax = plt.subplots(figsize=(10, 6))
+        sns.heatmap(num_df.corr(), annot=True, cmap="coolwarm", fmt=".2f", ax=ax)
+        st.pyplot(fig)
 
 # ========== Handle Duplicates ==========
 def remove_duplicates(df):
@@ -329,10 +366,12 @@ if file:
     df, original = load_data(file)
 
     tab = st.sidebar.radio("What do you want to do?", 
-                           ["Preview", "Duplicate Handling", "Null Handling", "Outlier Detection", "Type Convertor", "Reset Data"])
+                           ["Preview", "EDA", "Duplicate Handling", "Null Handling", "Outlier Detection", "Type Convertor", "Reset Data"])
 
     if tab == "Preview":
         preview_data(df)
+    elif tab == "EDA":
+        eda(df)
     elif tab == "Duplicate Handling":
         action = st.sidebar.radio("Pick Task", ["Remove Duplicates", "Drop Columns"])
         if action == "Remove Duplicates":
