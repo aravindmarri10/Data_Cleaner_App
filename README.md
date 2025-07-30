@@ -41,15 +41,41 @@ Sample Data: `sample_data/telco.csv`
 
 ## Real Use Case
 
-I used Cleaner to preprocess the [Telco Customer Churn Dataset](https://www.kaggle.com/blastchar/telco-customer-churn):
+I used Cleaner to preprocess the [Ames Housing (Kaggle)](https://www.kaggle.com/datasets/prevek18/ames-housing-dataset):
 
-- Dropped two columns with over 80% nulls
-- Converted `TotalCharges` from object to float
-- Filled missing values in `tenure` using median
-- Capped outliers in `MonthlyCharges` using IQR
+### 1. Duplicate Check
+- ✅ No exact duplicate rows found.
+- Action: No cleaning required.
 
-Result: A fully cleaned dataset used in a churn prediction model with minimal data loss.
+### 2. Null Handling
 
+- Dropped 'Mas Vnr Type' (60.58%) 
+- Dropped 'Fireplace Qu' (48.53%) 
+
+#### Filled Categorical Columns (with most frequent value):
+- 'Bsmt Qual', 'Bsmt Cond', 'Bsmt Exposure', 'BsmtFin Type 1', 'BsmtFin Type 2'
+- 'Garage Type', 'Garage Finish', 'Garage Qual', 'Garage Cond', 'Electrical'
+
+#### Filled Numerical Columns:
+- 'Lot Frontage' – median
+- 'Mas Vnr Area', 'Garage Yr Blt', 'BsmtFin SF 1', 'Total Bsmt SF', 'Garage Area' – median
+- 'BsmtFin SF 2', 'Bsmt Unf SF', 'Garage Cars', 'Bsmt Full Bath', 'Bsmt Half Bath' – filled with 0 (sparse columns)
+
+### 3. Outlier Handling
+
+- Detected strong outliers in:
+  - 'GrLivArea', `LotFrontage`, `TotalBsmtSF`, `SalePrice`, `GarageYrBlt`, `BsmtFin SF 2`, `Screen Porch`, `Mas Vnr Area`, `Open Porch SF`, `Misc Val`
+
+- Action: Applied IQR-based **capping** on these variables
+
+- Optional outliers (capped selectively):  
+  - `Garage Cars`, `Kitchen AbvGr`, `Low Qual Fin SF`, `Bedroom AbvGr`, `Fireplaces`, `3Ssn Porch`
+
+- Justification:  
+  - Capping avoids row loss while reducing skew  
+  - Keeps dataset stable for regression-based models
+    
+    
 ---
 
 ## Tech Stack
