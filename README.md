@@ -64,7 +64,7 @@ I used Cleaner to preprocess the [Ames Housing (Kaggle)](https://www.kaggle.com/
 ### 3. Outlier Handling
 
 - Detected strong outliers in:
-  - 'GrLivArea', `LotFrontage`, `TotalBsmtSF`, `SalePrice`, `GarageYrBlt`, `BsmtFin SF 2`, `Screen Porch`, `Mas Vnr Area`, `Open Porch SF`, `Misc Val`
+  - `GrLivArea`, `LotFrontage`, `TotalBsmtSF`, `SalePrice`, `GarageYrBlt`, `BsmtFin SF 2`, `Screen Porch`, `Mas Vnr Area`, `Open Porch SF`, `Misc Val`
 
 - Action: Applied IQR-based **capping** on these variables
 
