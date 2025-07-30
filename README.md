@@ -91,8 +91,6 @@ streamlit run cleaner_app.py
 
 ---
 
----
-
 ## License
 
 MIT — feel free to use, fork, or extend this project.
